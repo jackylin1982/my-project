@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>JS 複利計算完全版</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            background: #f8f9fa;
+            padding: 20px;
+        }
+
+        .box {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+
+        h3 {
+            text-align: center;
+            color: #333;
+        }
+
+        input,
+        button,
+        select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* 動畫準備 */
+        #res {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e9f7ef;
+            border-left: 5px solid #28a745;
+            display: none;
+            line-height: 1.8;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        /* 當 JS 加入此 class 時觸發淡入 */
+        #res.show {
+            display: block !important;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <h3>💰 紅利試算 (JS 完全版)</h3>
+        <input type="number" id="base" value="1000000">
+        <input type="number" id="rate" value="5">
+        <input type="number" id="year" value="3">
+        <select id="calM">
+            <option value="s">單利</option>
+            <option value="c">複利</option>
+        </select>
+        <button onclick="run()">開始計算</button>
+        <div id="res"></div>
+    </div>
+
+    <script>
+        function run() {
+            // 抓取結果區塊並重設狀態
+            var resDiv = document.getElementById("res");
+            resDiv.classList.remove("show");
+            resDiv.style.display = "none";
+
+            // 抓取輸入數值
+            var b = parseFloat(document.getElementById("base").value);
+            var r = parseFloat(document.getElementById("rate").value);
+            var y = parseInt(document.getElementById("year").value);
+            var calM = String(document.getElementById("calM").value);
+
+            // 基礎防呆
+            if (isNaN(b) || y <= 0) return;
+
+            var records = [];
+            var temp_b = b;
+            var total_p = 0;
+            var total_list = "";
+
+            // 邏輯運算
+            for (var i = 1; i <= y; i++) {
+                var p = Math.round(temp_b * (r / 100));//p為當年獲利
+                records.push(p);
+                total_p += p;
+                if (calM == "c") {
+                    temp_b += p;
+                }
+
+                // 逐年明細字串拼接
+                total_list = total_list + '第' + i + '年：' + p.toLocaleString() + '元<br>';
+            }
+
+            // Console 除錯觀察
+            console.log("--- 收益陣列紀錄 ---");
+            console.log(records);
+
+            // 渲染內容到畫面
+            resDiv.innerHTML = total_list +
+                "<br><b>累積總收益：$" + total_p.toLocaleString() + "</b><hr>" +
+                "第一年獲益：$" + records[0].toLocaleString() + "<br>" +
+                "最後一年獲益：$" + records[records.length - 1].toLocaleString();
+
+            // 執行原生 JS 淡入動畫
+                //HTML 標籤會從 <div id="res"> 變成 <div id="res" class="show">
+                //初始隱藏：原本 #res 設定了 opacity: 0;（完全透明）與 transition: opacity 1s;（過渡動畫 1 秒）。
+                //狀態切換：當 JS 加上 .show 類別時，觸發了 #res.show { opacity: 1; } 這個規則。
+                //視覺效果：瀏覽器偵測到 opacity 從 0 變成了 1，並根據 transition 設定，花了 1 秒的時間慢慢地把內容顯示出來。
+            resDiv.style.display = "block";
+            setTimeout(function () {
+                resDiv.classList.add("show");
+            }, 200);
+        }
+    </script>
+</body>
+
+</html>
